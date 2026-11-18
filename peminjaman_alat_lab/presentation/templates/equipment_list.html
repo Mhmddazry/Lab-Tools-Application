@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Daftar Alat{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Inventaris laboratorium</p>
+    <h1>Daftar alat</h1>
+    <p class="muted">Kelola alat dan pantau jumlah unit yang sedang tersedia.</p>
+  </div>
+  <a class="button button-muted" href="{{ url_for('presentation.loan_list') }}">Lihat peminjaman</a>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <h2>Tambah alat</h2>
+      <p class="muted">Masukkan alat baru ke inventaris laboratorium.</p>
+    </div>
+  </div>
+  <form method="post" action="{{ url_for('presentation.add_equipment') }}" class="form-grid">
+    <label>Nama alat
+      <input name="name" maxlength="100" required placeholder="Contoh: Mikroskop">
+    </label>
+    <label>Stok awal
+      <input type="number" name="total_stock" min="0" step="1" required value="1">
+    </label>
+    <label class="wide">Deskripsi
+      <textarea name="description" maxlength="500" rows="2" placeholder="Keterangan singkat (opsional)"></textarea>
+    </label>
+    <div class="form-actions wide">
+      <button class="button" type="submit">Tambah alat</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <h2>Inventaris</h2>
+      <p class="muted">{{ equipment|length }} jenis alat tercatat.</p>
+    </div>
+  </div>
+  {% if equipment %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nama alat</th><th>Deskripsi</th><th>Stok tersedia</th><th>Stok total</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for item in equipment %}
+        <tr>
+          <td class="primary-cell">{{ item.name }}</td>
+          <td>{{ item.description or "—" }}</td>
+          <td><span class="stock-pill {% if item.available_stock == 0 %}stock-empty{% endif %}">{{ item.available_stock }}</span></td>
+          <td>{{ item.total_stock }}</td>
+          <td>
+            <div class="actions">
+              <a class="text-link" href="{{ url_for('presentation.edit_equipment_form', equipment_id=item.id) }}">Ubah</a>
+              <form method="post" action="{{ url_for('presentation.delete_equipment', equipment_id=item.id) }}" onsubmit="return confirm('Hapus alat ini? Alat dengan riwayat peminjaman tidak dapat dihapus.');">
+                <button class="text-button danger-text" type="submit">Hapus</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><strong>Belum ada alat.</strong><span>Gunakan formulir di atas untuk menambahkan inventaris pertama.</span></div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Peminjaman Alat{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Transaksi laboratorium</p>
+    <h1>Peminjaman alat</h1>
+    <p class="muted">Catat peminjaman dan pengembalian. Stok diperbarui otomatis.</p>
+  </div>
+  <a class="button button-muted" href="{{ url_for('presentation.equipment_list') }}">Kelola inventaris</a>
+</section>
+
+<section class="panel">
+  <div class="section-heading">
+    <div>
+      <h2>Catat peminjaman</h2>
+      <p class="muted">Peminjaman akan ditolak jika stok yang tersedia tidak mencukupi.</p>
+    </div>
+  </div>
+  {% set available_items = equipment|selectattr('available_stock', 'gt', 0)|list %}
+  {% if available_items %}
+  <form method="post" action="{{ url_for('presentation.add_loan') }}" class="form-grid">
+    <label>Nama peminjam
+      <input name="borrower_name" maxlength="100" required placeholder="Nama mahasiswa/peminjam">
+    </label>
+    <label>Alat
+      <select name="equipment_id" required>
+        {% for item in available_items %}
+        <option value="{{ item.id }}">{{ item.name }} — tersedia {{ item.available_stock }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Jumlah
+      <input type="number" name="quantity" min="1" step="1" required value="1">
+    </label>
+    <label>Tanggal jatuh tempo
+      <input type="date" name="due_date" min="{{ today }}" required>
+    </label>
+    <div class="form-actions wide">
+      <button class="button" type="submit">Simpan peminjaman</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="empty-state compact"><strong>Tidak ada alat yang tersedia.</strong><span>Tambahkan alat atau lakukan pengembalian sebelum mencatat transaksi.</span></div>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <div class="section-heading section-heading-wrap">
+    <div>
+      <h2>{{ "Semua transaksi" if show_all else "Peminjaman aktif" }}</h2>
+      <p class="muted">{{ loans|length }} transaksi ditampilkan.</p>
+    </div>
+    {% if show_all %}
+      <a class="text-link" href="{{ url_for('presentation.loan_list') }}">Tampilkan yang aktif</a>
+    {% else %}
+      <a class="text-link" href="{{ url_for('presentation.loan_list', view='all') }}">Lihat semua riwayat</a>
+    {% endif %}
+  </div>
+  {% if loans %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Peminjam</th><th>Alat</th><th>Jumlah</th><th>Tanggal pinjam</th><th>Jatuh tempo</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody>
+        {% for loan in loans %}
+        <tr>
+          <td class="primary-cell">{{ loan.borrower_name }}</td>
+          <td>{{ loan.equipment_name }}</td>
+          <td>{{ loan.quantity }}</td>
+          <td>{{ loan.loaned_at }}</td>
+          <td>{{ loan.due_date }}</td>
+          <td><span class="status-pill {% if loan.status == 'returned' %}status-returned{% endif %}">{{ "Aktif" if loan.status == "active" else "Dikembalikan" }}</span></td>
+          <td>
+            {% if loan.status == "active" %}
+            <form method="post" action="{{ url_for('presentation.return_loan', loan_id=loan.id) }}" onsubmit="return confirm('Catat pengembalian alat ini?');">
+              <button class="text-button" type="submit">Kembalikan</button>
+            </form>
+            {% else %}
+            <span class="muted">{{ loan.returned_at }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><strong>Belum ada transaksi.</strong><span>Transaksi yang dibuat akan muncul di sini.</span></div>
+  {% endif %}
+</section>
+{% endblock %}

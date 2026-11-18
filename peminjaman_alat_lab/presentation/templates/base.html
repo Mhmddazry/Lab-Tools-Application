@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f8">
+  <title>{% block title %}LabPinjam{% endblock %} · LabPinjam</title>
+  <link rel="stylesheet" href="{{ url_for('presentation.static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="{{ url_for('presentation.equipment_list') }}">
+        <span class="brand-mark">L</span>
+        <span>Lab<span class="brand-light">Pinjam</span></span>
+      </a>
+      <nav aria-label="Navigasi utama">
+        <a class="nav-link {% if request.endpoint == 'presentation.equipment_list' or request.endpoint == 'presentation.edit_equipment_form' %}active{% endif %}" href="{{ url_for('presentation.equipment_list') }}">Inventaris</a>
+        <a class="nav-link {% if request.endpoint == 'presentation.loan_list' %}active{% endif %}" href="{{ url_for('presentation.loan_list') }}">Peminjaman</a>
+      </nav>
+      <span class="local-badge"><span></span> Sistem lokal</span>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" role="status">
+          {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">
+            <span>{{ message }}</span>
+            <button type="button" class="flash-close" aria-label="Tutup" onclick="this.parentElement.remove()">×</button>
+          </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">Sistem Peminjaman Alat Laboratorium <span>·</span> Project Arsitektur Perangkat Lunak</footer>
+</body>
+</html>

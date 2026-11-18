@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Ubah Data Alat{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Inventaris laboratorium</p>
+    <h1>Ubah data alat</h1>
+    <p class="muted">Stok tersedia akan disesuaikan mengikuti perubahan stok total.</p>
+  </div>
+  <a class="button button-muted" href="{{ url_for('presentation.equipment_list') }}">Kembali</a>
+</section>
+
+<section class="panel form-panel">
+  <form method="post" action="{{ url_for('presentation.edit_equipment', equipment_id=equipment.id) }}" class="form-grid">
+    <label class="wide">Nama alat
+      <input name="name" maxlength="100" required value="{{ equipment.name }}">
+    </label>
+    <label class="wide">Deskripsi
+      <textarea name="description" maxlength="500" rows="3">{{ equipment.description }}</textarea>
+    </label>
+    <label>Stok total
+      <input type="number" name="total_stock" min="{{ equipment.total_stock - equipment.available_stock }}" required value="{{ equipment.total_stock }}">
+    </label>
+    <div class="form-note">Sedang dipinjam: <strong>{{ equipment.total_stock - equipment.available_stock }}</strong> unit.</div>
+    <div class="form-actions wide">
+      <button class="button" type="submit">Simpan perubahan</button>
+      <a class="button button-muted" href="{{ url_for('presentation.equipment_list') }}">Batal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
